@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Dyslexia Audible Aid</string>
+    <string name="take_picture_button">Take Photo</string>
+    <string name="imageView_description">Photo taken by user</string>
+</resources>
