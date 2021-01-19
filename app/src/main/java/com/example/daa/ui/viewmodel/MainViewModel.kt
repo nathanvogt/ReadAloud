@@ -38,6 +38,11 @@ class MainViewModel : ViewModel() {
     private lateinit var imageFile : File
     private lateinit var imageUri : Uri
 
+    fun setImageURs(uri : Uri){
+        imageUri = uri
+        imageFile = File(uri.path)
+    }
+
         //CAP VARIABLES
     private lateinit var audioFile : File
 

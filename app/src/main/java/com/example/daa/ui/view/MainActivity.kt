@@ -19,6 +19,8 @@ import com.example.daa.data.model.CAP_PAUSE
 import com.example.daa.data.model.CAP_PLAY
 import com.example.daa.data.model.CAP_REW
 import com.example.daa.ui.viewmodel.MainViewModel
+import com.theartofdev.edmodo.cropper.CropImage
+import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.coroutines.*
 
 
@@ -115,27 +117,54 @@ class MainActivity : AppCompatActivity() {
 
     //photo controls
     fun takeImage(view: View) {
+        startPicIntent()
+    }
+    fun openImage(view : View){
+        //open image from gallery
+    }
+
+    //start photo conversion process
+    fun startPicIntent(){
         pauseAudio()
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel.getImageUri())
         takePictureIntent.putExtra("return-data", true)
         startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
     }
+    fun convertPhoto(){
+        viewModel.setInitTTS(false)
+        viewModel.displayPlayerControls.value = false
+        imageView.setImageDrawable(null)
+        setTakePhotoVisibility(false)
+        setPlayerVisibility(false)
+        loadingSpinner.visibility = View.VISIBLE
+        seekBar.setProgress(0)
+        viewModel.photoTaken()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if(requestCode == REQUEST_IMAGE_CAPTURE){
             if(resultCode == Activity.RESULT_OK){
-                viewModel.setInitTTS(false)
-                viewModel.displayPlayerControls.value = false
-                imageView.setImageDrawable(null)
-                setTakePhotoVisibility(false)
-                setPlayerVisibility(false)
-                loadingSpinner.visibility = View.VISIBLE
-                seekBar.setProgress(0)
-                viewModel.photoTaken()
+                //crop the taken photo
+                // start cropping activity for pre-acquired image saved on the device
+                CropImage.activity(viewModel.getImageUri())
+                    .setInitialCropWindowPaddingRatio(0.toFloat())
+                    .start(this);
             }
             if(resultCode != Activity.RESULT_OK && resultCode != Activity.RESULT_CANCELED){
                 val toast = Toast.makeText(this, "Could not capture image", Toast.LENGTH_SHORT)
                 toast.show()
+            }
+        }
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
+            val result = CropImage.getActivityResult(data)
+            if(resultCode == Activity.RESULT_OK){
+                viewModel.setImageURs(result.uri)
+                convertPhoto()
+            }
+            //if cancelled crop
+            if(resultCode == 0){
+                startPicIntent()
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
@@ -252,6 +281,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
 }
