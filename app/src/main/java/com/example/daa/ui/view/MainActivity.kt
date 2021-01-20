@@ -1,7 +1,6 @@
 package com.example.daa.ui.view
 
 import android.app.Activity
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
@@ -20,19 +19,22 @@ import com.example.daa.data.model.CAP_PLAY
 import com.example.daa.data.model.CAP_REW
 import com.example.daa.ui.viewmodel.MainViewModel
 import com.theartofdev.edmodo.cropper.CropImage
-import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.coroutines.*
 
 
 val REQUEST_IMAGE_CAPTURE = 1
 val REQUEST_IMAGE_CROP = 2
+val OPEN_IMAGE = 3
 val UTTERANCE_ID = "DAA_TTS"
 
 class MainActivity : AppCompatActivity() {
 
+    var previousAction = 0
+
     //UI Widgets
     lateinit var imageView: ImageView
     lateinit var takePhotoButton : Button
+    lateinit var openPhotoButton : Button
     lateinit var bt_play_pause : ImageButton
     lateinit var bt_ff : ImageButton
     lateinit var bt_rew : ImageButton
@@ -62,7 +64,10 @@ class MainActivity : AppCompatActivity() {
 
     //initialization
     fun initializeButtons(){
-        takePhotoButton = findViewById<Button>(R.id.button).also{ butt ->
+        takePhotoButton = findViewById<Button>(R.id.takePhotoButton).also{ butt ->
+            butt.visibility = View.INVISIBLE
+        }
+        openPhotoButton = findViewById<Button>(R.id.openPhotoButton).also{ butt ->
             butt.visibility = View.INVISIBLE
         }
         imageView = findViewById(R.id.image_display)
@@ -120,7 +125,13 @@ class MainActivity : AppCompatActivity() {
         startPicIntent()
     }
     fun openImage(view : View){
-        //open image from gallery
+        startOpenPicIntent()
+    }
+    fun startCropper(uri : Uri){
+        // start cropping activity for pre-acquired image saved on the device
+        CropImage.activity(uri)
+                .setInitialCropWindowPaddingRatio(0.toFloat())
+                .start(this)
     }
 
     //start photo conversion process
@@ -130,6 +141,12 @@ class MainActivity : AppCompatActivity() {
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel.getImageUri())
         takePictureIntent.putExtra("return-data", true)
         startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+    }
+    fun startOpenPicIntent(){
+        //open image from gallery
+        val i = Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.INTERNAL_CONTENT_URI)
+        startActivityForResult(i, OPEN_IMAGE)
     }
     fun convertPhoto(){
         viewModel.setInitTTS(false)
@@ -143,13 +160,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == REQUEST_IMAGE_CAPTURE){
             if(resultCode == Activity.RESULT_OK){
                 //crop the taken photo
-                // start cropping activity for pre-acquired image saved on the device
-                CropImage.activity(viewModel.getImageUri())
-                    .setInitialCropWindowPaddingRatio(0.toFloat())
-                    .start(this);
+                previousAction = 0
+                startCropper(viewModel.getImageUri())
             }
             if(resultCode != Activity.RESULT_OK && resultCode != Activity.RESULT_CANCELED){
                 val toast = Toast.makeText(this, "Could not capture image", Toast.LENGTH_SHORT)
@@ -157,26 +173,42 @@ class MainActivity : AppCompatActivity() {
             }
         }
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
-            val result = CropImage.getActivityResult(data)
+            //successful crop
             if(resultCode == Activity.RESULT_OK){
+                val result = CropImage.getActivityResult(data)
                 viewModel.setImageURs(result.uri)
                 convertPhoto()
             }
             //if cancelled crop
             if(resultCode == 0){
-                startPicIntent()
+                when(previousAction){
+                    0 -> startPicIntent()
+                    1 -> startOpenPicIntent()
+                }
             }
         }
-        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == OPEN_IMAGE){
+            //successfully opened image
+            if(resultCode == Activity.RESULT_OK){
+                val uri = data?.data
+                if(uri != null){
+                    viewModel.setImageURs(uri)
+                    previousAction = 1
+                    startCropper(uri)
+                }
+            }
+        }
     }
 
     //ui widget visibility controllers
     fun setTakePhotoVisibility(status : Boolean){
         if(status){
             takePhotoButton.visibility = View.VISIBLE
+            openPhotoButton.visibility = View.VISIBLE
         }
         if(!status){
             takePhotoButton.visibility = View.INVISIBLE
+            openPhotoButton.visibility = View.INVISIBLE
         }
     }
     fun setPlayerVisibility(status : Boolean, duration : Int? = null){

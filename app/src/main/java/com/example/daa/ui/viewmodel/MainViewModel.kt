@@ -99,11 +99,12 @@ class MainViewModel : ViewModel() {
     suspend fun photoToAudio() : Bitmap{
         if(!this::imageFile.isInitialized) { throw Error("can't load image file before photo is taken") }
         val (originalImage, rotatedImage, rotation) = ocr.retrieveImageFromFile(imageFile)
-        imageFile.delete()
+//        imageFile.delete()
         val text = extractText(originalImage, rotation).text
         tts.textToAudioFile(text, getAudioFile())
         cap.loadAudioFile(audioFile)
-        audioFile.delete()
+//        audioFile.delete()
+        clearDirs(application)
         return rotatedImage
     }
 

@@ -16,18 +16,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:indeterminate="true" />
+
     </RelativeLayout>
 
     <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
+        android:id="@+id/takePhotoButton"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginBottom="16dp"
         android:onClick="takeImage"
         android:text="@string/take_picture_button"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btPlayPause"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/openPhotoButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:onClick="openImage"
+        android:text="@string/open_image_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btPlayPause" />
 
     <ImageView
         android:id="@+id/image_display"
@@ -50,7 +64,7 @@
         android:layout_height="50dp"
         android:layout_marginBottom="16dp"
         android:onClick="playPause"
-        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintBottom_toTopOf="@+id/takePhotoButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@android:drawable/ic_media_pause" />
@@ -62,7 +76,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:onClick="rew"
-        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintBottom_toTopOf="@+id/takePhotoButton"
         app:layout_constraintEnd_toStartOf="@+id/btPlayPause"
         app:srcCompat="@drawable/ic_media_rew" />
 
@@ -73,7 +87,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginBottom="16dp"
         android:onClick="ff"
-        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintBottom_toTopOf="@+id/takePhotoButton"
         app:layout_constraintStart_toEndOf="@+id/btPlayPause"
         app:srcCompat="@drawable/ic_media_ff" />
 
@@ -87,4 +101,5 @@
         app:layout_constraintBottom_toTopOf="@+id/btPlayPause"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
