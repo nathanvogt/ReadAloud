@@ -133,11 +133,19 @@ class MainViewModel : ViewModel() {
     //OCR API
     fun getImageUri() : Uri{
         if(this::imageUri.isInitialized) { return imageUri }
-        imageUri = ocr.getImageURI(application, getImageFile())
+        imageUri = ocr.getImageURI(application, createImageFile())
         return imageUri
     }
     fun getImageFile() : File {
         if(this::imageFile.isInitialized) { return imageFile }
+        imageFile = ocr.createImageFile(application)
+        return imageFile
+    }
+    fun createImageUri() : Uri{
+        imageUri = ocr.getImageURI(application, createImageFile())
+        return imageUri
+    }
+    fun createImageFile() : File{
         imageFile = ocr.createImageFile(application)
         return imageFile
     }

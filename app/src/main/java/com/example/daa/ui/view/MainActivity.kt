@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    //photo controls
+    //photo button calls
     fun takeImage(view: View) {
         startPicIntent()
     }
@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity() {
     fun startPicIntent(){
         pauseAudio()
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel.getImageUri())
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel.createImageUri())
         takePictureIntent.putExtra("return-data", true)
         startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
     }
