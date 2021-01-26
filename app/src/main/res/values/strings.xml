@@ -3,4 +3,5 @@
     <string name="take_picture_button">Take Photo</string>
     <string name="imageView_description">Photo taken by user</string>
     <string name="open_image_button">Open</string>
+    <string name="crop_switch_text">Crop</string>
 </resources>

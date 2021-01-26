@@ -13,6 +13,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import java.io.File
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,10 +39,9 @@ class CustomOCR {
                 storageDir /* directory */
         )
     }
-    fun retrieveImageFromFile(file : File) : Triple<Bitmap, Bitmap, Int>{
-        val imagePath = file.absolutePath
-        val originalImageBitmap = BitmapFactory.decodeFile(imagePath)
-        val rotation = getImageRotation(imagePath)
+    fun retrieveImageFromFile(inputStream : InputStream) : Triple<Bitmap, Bitmap, Int>{
+        val originalImageBitmap = BitmapFactory.decodeStream(inputStream)
+        val rotation = getImageRotation(inputStream)
         val rotatedImageBitmap = rotateImage(originalImageBitmap, rotation)
         return Triple(originalImageBitmap, rotatedImageBitmap, rotation)
     }
@@ -52,8 +52,8 @@ class CustomOCR {
                 file
         )
     }
-    private fun getImageRotation(imagePath : String): Int {
-        val exifInterface = ExifInterface(imagePath)
+    private fun getImageRotation(imageStream: InputStream): Int {
+        val exifInterface = ExifInterface(imageStream)
         val orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, 69)
         when(orientation){
             ExifInterface.ORIENTATION_NORMAL -> return 0

@@ -20,6 +20,7 @@ import com.example.daa.data.model.CAP_REW
 import com.example.daa.ui.viewmodel.MainViewModel
 import com.theartofdev.edmodo.cropper.CropImage
 import kotlinx.coroutines.*
+import java.io.File
 
 
 val REQUEST_IMAGE_CAPTURE = 1
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var bt_rew : ImageButton
     lateinit var seekBar : SeekBar
     lateinit var loadingSpinner : View
+    lateinit var cropSwitch : Switch
 
     //SeekBar Updater
     lateinit var seekBarUpdaterJob : Job
@@ -95,6 +97,7 @@ class MainActivity : AppCompatActivity() {
                 }
             })
         }
+        cropSwitch = findViewById(R.id.switch1)
     }
     fun initializeObservers(){
         //when TTS is initialized
@@ -165,7 +168,8 @@ class MainActivity : AppCompatActivity() {
             if(resultCode == Activity.RESULT_OK){
                 //crop the taken photo
                 previousAction = 0
-                startCropper(viewModel.getImageUri())
+                if(cropSwitch.isChecked){startCropper(viewModel.getImageUri())}
+                else{convertPhoto()}
             }
             if(resultCode != Activity.RESULT_OK && resultCode != Activity.RESULT_CANCELED){
                 val toast = Toast.makeText(this, "Could not capture image", Toast.LENGTH_SHORT)
@@ -194,7 +198,8 @@ class MainActivity : AppCompatActivity() {
                 if(uri != null){
                     viewModel.setImageURs(uri)
                     previousAction = 1
-                    startCropper(uri)
+                    if(cropSwitch.isChecked){startCropper(uri)}
+                    else{convertPhoto()}
                 }
             }
         }

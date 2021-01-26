@@ -1,15 +1,18 @@
 package com.example.daa.ui.viewmodel
 
 import android.app.Application
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Environment
+import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.loader.content.CursorLoader
 import com.example.daa.data.model.CustomAudioPlayer
 import com.example.daa.data.model.CustomOCR
 import com.example.daa.data.model.CustomTTS
@@ -18,6 +21,7 @@ import com.google.mlkit.vision.text.Text
 import kotlinx.coroutines.*
 import java.io.File
 import kotlin.coroutines.resume
+
 
 class MainViewModel : ViewModel() {
 
@@ -37,6 +41,8 @@ class MainViewModel : ViewModel() {
         //OCR VARIABLES
     private lateinit var imageFile : File
     private lateinit var imageUri : Uri
+
+
 
     fun setImageURs(uri : Uri){
         imageUri = uri
@@ -97,13 +103,15 @@ class MainViewModel : ViewModel() {
 
     //Convert image to audio file
     suspend fun photoToAudio() : Bitmap{
-        if(!this::imageFile.isInitialized) { throw Error("can't load image file before photo is taken") }
-        val (originalImage, rotatedImage, rotation) = ocr.retrieveImageFromFile(imageFile)
-//        imageFile.delete()
-        val text = extractText(originalImage, rotation).text
+        if(!this::imageUri.isInitialized) { throw Error("can't load image file before photo is taken") }
+        val imageStream = application.contentResolver.openInputStream(imageUri)
+        val (originalImage, rotatedImage, rotation) = ocr.retrieveImageFromFile(imageStream!!)
+        var text = extractText(originalImage, rotation).text
+        if(text.length <= 0){
+            text = "No Text Found!"
+        }
         tts.textToAudioFile(text, getAudioFile())
         cap.loadAudioFile(audioFile)
-//        audioFile.delete()
         clearDirs(application)
         return rotatedImage
     }
@@ -135,11 +143,6 @@ class MainViewModel : ViewModel() {
         if(this::imageUri.isInitialized) { return imageUri }
         imageUri = ocr.getImageURI(application, createImageFile())
         return imageUri
-    }
-    fun getImageFile() : File {
-        if(this::imageFile.isInitialized) { return imageFile }
-        imageFile = ocr.createImageFile(application)
-        return imageFile
     }
     fun createImageUri() : Uri{
         imageUri = ocr.getImageURI(application, createImageFile())
